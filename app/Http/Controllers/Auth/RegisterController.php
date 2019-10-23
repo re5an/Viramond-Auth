@@ -8,6 +8,12 @@ use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\Request;
+
+use App\Jobs\SendWelcomeEmail;
+
+
 class RegisterController extends Controller
 {
     /*
@@ -56,7 +62,7 @@ class RegisterController extends Controller
             'password' => ['required', 'string', 'min:1', 'confirmed'],
 
 //            FixMe Phone validation
-            'phone' => ['required', 'numeric']
+            'phone' => ['required', 'numeric', 'unique:users']
 //            'phone' => ['required', 'numeric', 'regex:/(09)[0-9]{9}/', 'unique:users']
         ]);
     }
@@ -76,4 +82,21 @@ class RegisterController extends Controller
             'password' => Hash::make($data['password']),
         ]);
     }
+
+	public function register(Request $request)
+	{
+		$this->validator($request->all())->validate();
+
+		event(new Registered($user = $this->create($request->all())));
+
+		$this->guard()->login($user);
+
+		$emailJob = new SendWelcomeEmail($user);
+		dispatch($emailJob);
+
+		return $this->registered($request, $user)
+			?: redirect($this->redirectPath());
+	}
+
+
 }
