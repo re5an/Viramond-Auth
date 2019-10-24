@@ -59,11 +59,11 @@ class RegisterController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
 
 //            Fixme password validation
-            'password' => ['required', 'string', 'min:1', 'confirmed'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
 
 //            FixMe Phone validation
-            'phone' => ['required', 'numeric', 'unique:users']
-//            'phone' => ['required', 'numeric', 'regex:/(09)[0-9]{9}/', 'unique:users']
+//            'phone' => ['required', 'numeric', 'unique:users']
+            'phone' => ['required', 'numeric', 'regex:/(09)[0-9]{9}/', 'unique:users']
         ]);
     }
 
